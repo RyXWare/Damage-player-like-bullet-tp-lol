@@ -4,7 +4,8 @@ getgenv().TeleportConfig = {
 }
 getgenv().OriginalTransparency = {}
 
-local Client = game.Players.LocalPlayer
+local Players = game:GetService("Players")
+local Client = Players.LocalPlayer
 local RunService = game:GetService("RunService")
 local StarterGui = game:GetService("StarterGui")
 
@@ -28,8 +29,53 @@ task.delay(300, function()
     })
 end)
 
+local lastHealth = {}
+
+local function notifyDamage(targetName, damageAmount)
+    StarterGui:SetCore("SendNotification", {
+        Title = "Damage Dealt",
+        Text = string.format("You damaged %s for %d HP", targetName, damageAmount),
+        Duration = 4
+    })
+end
+
+local function monitorPlayerHealth(player)
+    local character = player.Character
+    if not character then return end
+    local humanoid = character:FindFirstChildOfClass("Humanoid")
+    if not humanoid then return end
+    lastHealth[player.UserId] = humanoid.Health
+    humanoid.HealthChanged:Connect(function(newHealth)
+        local oldHealth = lastHealth[player.UserId] or newHealth
+        if newHealth < oldHealth then
+            local damageDone = oldHealth - newHealth
+            notifyDamage(player.Name, math.floor(damageDone))
+        end
+        lastHealth[player.UserId] = newHealth
+    end)
+end
+
+for _,player in pairs(Players:GetPlayers()) do
+    if player ~= Client then
+        player.CharacterAdded:Connect(function()
+            monitorPlayerHealth(player)
+        end)
+        if player.Character then
+            monitorPlayerHealth(player)
+        end
+    end
+end
+
+Players.PlayerAdded:Connect(function(player)
+    if player ~= Client then
+        player.CharacterAdded:Connect(function()
+            monitorPlayerHealth(player)
+        end)
+    end
+end)
+
 local function CreateTeleportGUI()
-    local gui = Client.PlayerGui:FindFirstChild("TeleportGUI")
+    local gui = Client.PlayerGui:FindFirstChild("DamageGUI")
     if gui then gui:Destroy() end
 
     gui = Instance.new("ScreenGui", Client.PlayerGui)
@@ -43,8 +89,8 @@ local function CreateTeleportGUI()
     SideFrame.BackgroundTransparency = 0.4
 
     local Scroll = Instance.new("ScrollingFrame", SideFrame)
-    Scroll.Size = UDim2.new(1,0,1,0)
-    Scroll.CanvasSize = UDim2.new(0,0,5,0)
+    Scroll.Size = UDim2.new(1, 0, 1, 0)
+    Scroll.CanvasSize = UDim2.new(0, 0, 5, 0)
     Scroll.ScrollBarThickness = 1
     Scroll.BackgroundTransparency = 1
 
@@ -58,26 +104,26 @@ local function CreateTeleportGUI()
             end
         end
 
-        for _,v in pairs(game.Players:GetPlayers()) do
+        for _, v in pairs(Players:GetPlayers()) do
             if v ~= Client then
                 local Toggle = Instance.new("TextButton", Scroll)
-                Toggle.Size = UDim2.new(0,180,0,30)
-                Toggle.TextColor3 = Color3.fromRGB(255,255,255)
-                Toggle.BackgroundColor3 = Color3.fromRGB(50,50,50)
-                Toggle.Text = v.DisplayName.." - [OFF]"
+                Toggle.Size = UDim2.new(0, 180, 0, 30)
+                Toggle.TextColor3 = Color3.fromRGB(255, 255, 255)
+                Toggle.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+                Toggle.Text = v.DisplayName .. " - [OFF]"
 
                 if getgenv().TeleportConfig.Targets[v.UserId] then
-                    Toggle.Text = v.DisplayName.." - [ON]"
+                    Toggle.Text = v.DisplayName .. " - [ON]"
                 end
 
                 Toggle.MouseButton1Click:Connect(function()
                     local id = v.UserId
                     if getgenv().TeleportConfig.Targets[id] then
                         getgenv().TeleportConfig.Targets[id] = nil
-                        Toggle.Text = v.DisplayName.." - [OFF]"
+                        Toggle.Text = v.DisplayName .. " - [OFF]"
                     else
                         getgenv().TeleportConfig.Targets[id] = true
-                        Toggle.Text = v.DisplayName.." - [ON]"
+                        Toggle.Text = v.DisplayName .. " - [ON]"
                     end
                 end)
             end
@@ -86,19 +132,19 @@ local function CreateTeleportGUI()
 
     RefreshPlayerList()
 
-    game.Players.PlayerAdded:Connect(RefreshPlayerList)
-    game.Players.PlayerRemoving:Connect(RefreshPlayerList)
+    Players.PlayerAdded:Connect(RefreshPlayerList)
+    Players.PlayerRemoving:Connect(RefreshPlayerList)
 
     local ToggleGUI = Instance.new("TextButton", gui)
     ToggleGUI.Size = UDim2.new(0, 180, 0, 30)
     ToggleGUI.Position = UDim2.new(0.5, -90, 0, 5)
     ToggleGUI.Text = "Hide Damage GUI"
-    ToggleGUI.TextColor3 = Color3.fromRGB(255,255,255)
-    ToggleGUI.BackgroundColor3 = Color3.fromRGB(40,40,40)
+    ToggleGUI.TextColor3 = Color3.fromRGB(255, 255, 255)
+    ToggleGUI.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 
     ToggleGUI.MouseButton1Click:Connect(function()
         SideFrame.Visible = not SideFrame.Visible
-        ToggleGUI.Text = SideFrame.Visible and "Hide Teleport GUI" or "Show Teleport GUI"
+        ToggleGUI.Text = SideFrame.Visible and "Hide Damage GUI" or "Show Damage GUI"
     end)
 end
 
@@ -120,7 +166,7 @@ RunService.RenderStepped:Connect(function()
         dir = Client.Character.HumanoidRootPart.CFrame.LookVector
     end
 
-    for _, player in pairs(game.Players:GetPlayers()) do
+    for _, player in pairs(Players:GetPlayers()) do
         if player ~= Client and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
             local id = player.UserId
             if getgenv().TeleportConfig.Targets[id] then
