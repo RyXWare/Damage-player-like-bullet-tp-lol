@@ -11,20 +11,20 @@ local StarterGui = game:GetService("StarterGui")
 StarterGui:SetCore("SendNotification", {
     Title = "THIS SCRIPT WAS MADE BY RYAN BITCH",
     Text = "THIS SCRIPT WAS MADE BY RYAN BITCH",
-    Duration = 5
+    Duration = 10
 })
 
 StarterGui:SetCore("SendNotification", {
     Title = "LOOK AT THIS",
-    Text = "WHEN PEOPLE TARGETTED THEY BECOME INVISIBLE",
-    Duration = 5
+    Text = "WHEN PEOPLE TARGETTED THEY BECOME INVISIBLE AND WHEN YOU VIEW THEM YOU VIEW YOURSELF.",
+    Duration = 10
 })
 
 task.delay(300, function()
     StarterGui:SetCore("SendNotification", {
         Title = "5 MINUTES LATER",
         Text = "THIS SCRIPT WAS MADE BY RYAN BITCH",
-        Duration = 5
+        Duration = 10
     })
 end)
 
@@ -33,7 +33,7 @@ local function CreateTeleportGUI()
     if gui then gui:Destroy() end
 
     gui = Instance.new("ScreenGui", Client.PlayerGui)
-    gui.Name = "TeleportGUI"
+    gui.Name = "DamageGUI"
     gui.ResetOnSpawn = false
 
     local SideFrame = Instance.new("Frame", gui)
@@ -92,7 +92,7 @@ local function CreateTeleportGUI()
     local ToggleGUI = Instance.new("TextButton", gui)
     ToggleGUI.Size = UDim2.new(0, 180, 0, 30)
     ToggleGUI.Position = UDim2.new(0.5, -90, 0, 5)
-    ToggleGUI.Text = "Hide Teleport GUI"
+    ToggleGUI.Text = "Hide Damage GUI"
     ToggleGUI.TextColor3 = Color3.fromRGB(255,255,255)
     ToggleGUI.BackgroundColor3 = Color3.fromRGB(40,40,40)
 
