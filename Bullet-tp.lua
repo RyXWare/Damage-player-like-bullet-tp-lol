@@ -49,7 +49,9 @@ local function monitorPlayerHealth(player)
         local oldHealth = lastHealth[player.UserId] or newHealth
         if newHealth < oldHealth then
             local damageDone = oldHealth - newHealth
-            notifyDamage(player.Name, math.floor(damageDone))
+            if getgenv().TeleportConfig.Targets[player.UserId] then
+                notifyDamage(player.Name, math.floor(damageDone))
+            end
         end
         lastHealth[player.UserId] = newHealth
     end)
@@ -77,23 +79,19 @@ end)
 local function CreateTeleportGUI()
     local gui = Client.PlayerGui:FindFirstChild("DamageGUI")
     if gui then gui:Destroy() end
-
     gui = Instance.new("ScreenGui", Client.PlayerGui)
     gui.Name = "DamageGUI"
     gui.ResetOnSpawn = false
-
     local SideFrame = Instance.new("Frame", gui)
     SideFrame.Size = UDim2.new(0, 200, 0, 360)
     SideFrame.Position = UDim2.new(0, 10, 0, 10)
     SideFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
     SideFrame.BackgroundTransparency = 0.4
-
     local Scroll = Instance.new("ScrollingFrame", SideFrame)
     Scroll.Size = UDim2.new(1, 0, 1, 0)
     Scroll.CanvasSize = UDim2.new(0, 0, 5, 0)
     Scroll.ScrollBarThickness = 1
     Scroll.BackgroundTransparency = 1
-
     local Layout = Instance.new("UIListLayout", Scroll)
     Layout.Padding = UDim.new(0, 5)
 
@@ -103,7 +101,6 @@ local function CreateTeleportGUI()
                 child:Destroy()
             end
         end
-
         for _, v in pairs(Players:GetPlayers()) do
             if v ~= Client then
                 local Toggle = Instance.new("TextButton", Scroll)
@@ -111,11 +108,9 @@ local function CreateTeleportGUI()
                 Toggle.TextColor3 = Color3.fromRGB(255, 255, 255)
                 Toggle.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
                 Toggle.Text = v.DisplayName .. " - [OFF]"
-
                 if getgenv().TeleportConfig.Targets[v.UserId] then
                     Toggle.Text = v.DisplayName .. " - [ON]"
                 end
-
                 Toggle.MouseButton1Click:Connect(function()
                     local id = v.UserId
                     if getgenv().TeleportConfig.Targets[id] then
@@ -131,7 +126,6 @@ local function CreateTeleportGUI()
     end
 
     RefreshPlayerList()
-
     Players.PlayerAdded:Connect(RefreshPlayerList)
     Players.PlayerRemoving:Connect(RefreshPlayerList)
 
@@ -141,7 +135,6 @@ local function CreateTeleportGUI()
     ToggleGUI.Text = "Hide Damage GUI"
     ToggleGUI.TextColor3 = Color3.fromRGB(255, 255, 255)
     ToggleGUI.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-
     ToggleGUI.MouseButton1Click:Connect(function()
         SideFrame.Visible = not SideFrame.Visible
         ToggleGUI.Text = SideFrame.Visible and "Hide Damage GUI" or "Show Damage GUI"
@@ -153,25 +146,13 @@ CreateTeleportGUI()
 RunService.RenderStepped:Connect(function()
     if not getgenv().TeleportConfig.Enabled then return end
     if not Client.Character or not Client.Character:FindFirstChild("HumanoidRootPart") then return end
-
-    local tool = Client.Character:FindFirstChildOfClass("Tool")
-    if not tool then return end
-
-    local pos, dir
-    if tool:FindFirstChild("Handle") then
-        pos = tool.Handle.Position
-        dir = tool.Handle.CFrame.LookVector
-    else
-        pos = Client.Character.HumanoidRootPart.Position
-        dir = Client.Character.HumanoidRootPart.CFrame.LookVector
-    end
-
+    local pos = Client.Character.HumanoidRootPart.Position
+    local dir = Client.Character.HumanoidRootPart.CFrame.LookVector
     for _, player in pairs(Players:GetPlayers()) do
         if player ~= Client and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
             local id = player.UserId
             if getgenv().TeleportConfig.Targets[id] then
                 player.Character.HumanoidRootPart.CFrame = CFrame.new(pos + dir * 3)
-
                 for _, part in pairs(player.Character:GetDescendants()) do
                     if part:IsA("BasePart") then
                         if not getgenv().OriginalTransparency[part] then
@@ -201,5 +182,3 @@ RunService.RenderStepped:Connect(function()
         end
     end
 end)
-
-In this script can  make it teleport 4 studs infront of me instead of infront of gun handle
