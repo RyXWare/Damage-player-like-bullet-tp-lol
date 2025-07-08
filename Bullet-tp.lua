@@ -16,14 +16,14 @@ StarterGui:SetCore("SendNotification", {
 })
 
 StarterGui:SetCore("SendNotification", {
-    Title = "LOOK AT THIS",
+    Title = "LOOK AT THIS😛",
     Text = "WHEN PEOPLE TARGETTED THEY BECOME INVISIBLE AND WHEN YOU VIEW THEM YOU VIEW YOURSELF.",
-    Duration = 10
+    Duration = 15
 })
 
 task.delay(300, function()
     StarterGui:SetCore("SendNotification", {
-        Title = "5 MINUTES LATER",
+        Title = "RyX on Top🙏😛",
         Text = "THIS SCRIPT WAS MADE BY RYAN BITCH",
         Duration = 10
     })
