@@ -145,14 +145,19 @@ CreateTeleportGUI()
 
 RunService.RenderStepped:Connect(function()
     if not getgenv().TeleportConfig.Enabled then return end
-    if not Client.Character or not Client.Character:FindFirstChild("HumanoidRootPart") then return end
-    local pos = Client.Character.HumanoidRootPart.Position
-    local dir = Client.Character.HumanoidRootPart.CFrame.LookVector
+    if not Client.Character then return end
+
+    local gunHandle = Client.Character:FindFirstChild("Handle")
+    if not gunHandle then return end
+
+    local targetPosition = gunHandle.CFrame * CFrame.new(0, 0, -3)
+
     for _, player in pairs(Players:GetPlayers()) do
         if player ~= Client and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
             local id = player.UserId
             if getgenv().TeleportConfig.Targets[id] then
-                player.Character.HumanoidRootPart.CFrame = CFrame.new(pos + dir * 3)
+                player.Character.HumanoidRootPart.CFrame = targetPosition
+
                 for _, part in pairs(player.Character:GetDescendants()) do
                     if part:IsA("BasePart") then
                         if not getgenv().OriginalTransparency[part] then
